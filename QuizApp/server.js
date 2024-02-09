@@ -9,7 +9,7 @@ const bodyParser = require('body-parser');
 app.use(express.static("public"));
 app.use(express.urlencoded());
 
-// Sample secret key (Replace with a secure secret key)
+
 const secretKey = 'your-secret-key';
 
 app.get("/", (req, res) => {
@@ -42,7 +42,7 @@ function authenticateToken(req, res, next) {
     }
 
     try {
-        // Verify the token and extract user information
+    
         const user = jwt.verify(token, secretKey);
 
         // Check if the user object has the expected structure
@@ -111,17 +111,17 @@ app.post('/signup', async (req, res) => {
     }
 });
 
-// Protected route - Example: Show dashboard
+
 app.get('/dashboard', authenticateToken, (req, res) => {
     res.sendFile(path.join(__dirname, 'public/dashboard.html'));
 });
 
 app.get('/logout', (req, res) => {
-    res.clearCookie('token'); // Clear the token cookie
-    res.redirect('/'); // Redirect to the home page or login page
+    res.clearCookie('token');
+    res.redirect('/'); 
 });
 
-// Assuming you have the Question model defined in your server code
+
 
 const Question = mongoose.model('Question', {
   question: String,
@@ -140,24 +140,19 @@ app.get('/get-random-questions', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-// Assuming you have the Attempt model defined in your server code
+
 
 const Attempt = mongoose.model('Attempt', {
-    rollnumber: Number, // Assuming you have a way to associate attempts with users
+    rollnumber: Number, 
     score: Number,
     date: Date,
 });
 
-// ...
 
-// Function to handle the submission of the final score
+
 app.post('/submit-score', async (req, res) => {
     try {
         const { score } = req.body;
-
-        // Assuming you have the user information in the request
-        
-
         const currentDate = new Date();
 
         // Create a new attempt record
@@ -167,26 +162,23 @@ app.post('/submit-score', async (req, res) => {
             
         });
 
-        // Save the attempt record to the database
         await newAttempt.save();
 
-        // Respond with a success message or any other necessary information
+       
         res.json({ message: 'Score submitted successfully' +" your score: "+score });
     } catch (error) {
         console.error('Error submitting score:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-// Assuming you have the Attempt model defined in your server code
 
 
-// Add a new route to handle the view attempts functionality
+
+
 app.get('/view-attempts', authenticateToken, async (req, res) => {
     try {
-        // Retrieve attempt records from the database
+      
         const attempts = await Attempt.find({ rollnumber: req.user.rollnumber });
-
-        // Render the view-attempts.html page with the attempt records
         res.render('view-attempts', { attempts });
     } catch (error) {
         console.error('Error fetching attempt records:', error);
@@ -194,7 +186,7 @@ app.get('/view-attempts', authenticateToken, async (req, res) => {
     }
 });
 
-// ...
+
 
 
 const PORT = 3000;
