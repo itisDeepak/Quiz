@@ -1,0 +1,59 @@
+<!-- dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <!-- Add any additional styles or meta tags if needed -->
+</head>
+<body>
+    <h1>Welcome to the Dashboard</h1>
+    
+    <!-- Add more content, buttons, links, etc. -->
+    <button onclick="logout()">Logout</button>
+    <button onclick="startQuiz()">Start Quiz</button>
+    <button onclick="viewAttempts()">View Attempts</button>
+
+    <script>
+        // Use JavaScript to extract username from the URL and display it
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('token'); // Assuming you passed the username in the token parameter
+
+        // If token is present, set it in localStorage
+        if (token) {
+            localStorage.setItem('token', token);
+        }
+        document.getElementById('username').innerText = username;
+
+        // Logout function
+        function logout() {
+            // Redirect to the logout endpoint or perform any other logout logic
+            fetch('/logout', {
+                method: 'GET',
+                credentials: 'same-origin', // Include credentials (cookies) in the request
+            })
+            .then(response => {
+                // Handle the response or redirect as needed
+                window.location.href = '/'; // Redirect to the home page
+            })
+            .catch(error => {
+                console.error('Logout failed:', error);
+                // Handle error, redirect to home, or show an error message
+            });
+        }
+
+        // Start Quiz function
+        function startQuiz() {
+            // Redirect to the quiz.html page or perform any other logic
+            window.location.href = '/quiz.html';
+        }
+
+        // View Attempts function
+        function viewAttempts() {
+            // Redirect to the attempts page or perform any other logic
+            window.location.href = '/view-attempts';
+        }
+    </script>
+</body>
+</html>

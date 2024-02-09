@@ -1,0 +1,62 @@
+<!-- view-attempts.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Attempts</title>
+    <!-- Add any additional styles or meta tags if needed -->
+</head>
+<body>
+    <h1>Attempt Records</h1>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody id="attempts-container">
+            <!-- Attempt records will be dynamically inserted here -->
+        </tbody>
+    </table>
+
+    <button onclick="goBack()">Go Back</button>
+
+    <script>
+        // Fetch attempt records from the server
+        fetch('/view-attempts', {
+            method: 'GET',
+            credentials: 'same-origin', // Include credentials (cookies) in the request
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Display attempt records in the table
+            const attemptsContainer = document.getElementById('attempts-container');
+            data.attempts.forEach(attempt => {
+                const row = document.createElement('tr');
+                const dateCell = document.createElement('td');
+                const scoreCell = document.createElement('td');
+
+                dateCell.textContent = new Date(attempt.date).toLocaleDateString();
+                scoreCell.textContent = attempt.score;
+
+                row.appendChild(dateCell);
+                row.appendChild(scoreCell);
+                attemptsContainer.appendChild(row);
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching attempt records:', error);
+            // Handle error, show an error message, or redirect as needed
+        });
+
+        // Go Back function
+        function goBack() {
+            // Redirect to the dashboard or perform any other logic
+            window.location.href = '/dashboard';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!-- quiz.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <style>
+        /* Add your CSS styles here */
+    </style>
+</head>
+<body>
+    <h1>Quiz</h1>
+    <div id="quiz-container">
+        <div id="question-container"></div>
+        <div id="options-container"></div>
+        <button id="submit-btn" onclick="submitAnswer()">Submit</button>
+        <button id="next-btn" onclick="nextQuestion()" style="display: none;">Next</button>
+    
+        <div id="score-container" style="display: none;"></div>
+    </div>
+
+    <script>
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let questions = [];
+
+        // Function to fetch random questions from the server
+        async function fetchRandomQuestions() {
+            try {
+                const response = await fetch('/get-random-questions', {
+                    method: 'GET',
+                    credentials: 'same-origin', // Include credentials (cookies) in the request
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch questions');
+                }
+
+                questions = await response.json();
+                return questions;
+            } catch (error) {
+                console.error('Error fetching questions:', error);
+            }
+        }
+
+        // Function to display the current question and options
+        function displayQuestion() {
+            const question = questions[currentQuestionIndex];
+
+            // Update the HTML to display the question and options
+            document.getElementById('question-container').innerText = question.question;
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            question.options.forEach((option, index) => {
+                const radioBtn = document.createElement('input');
+                radioBtn.type = 'radio';
+                radioBtn.name = 'options';
+                radioBtn.value = option;
+                radioBtn.id = `option${index}`;
+
+                const label = document.createElement('label');
+                label.htmlFor = `option${index}`;
+                label.innerText = option;
+
+                optionsContainer.appendChild(radioBtn);
+                optionsContainer.appendChild(label);
+                optionsContainer.appendChild(document.createElement('br'));
+            });
+        }
+
+        // Function to submit the selected answer
+        function submitAnswer() {
+            const selectedOption = document.querySelector('input[name="options"]:checked');
+
+            if (selectedOption) {
+                // Check if the selected option is correct and update the score
+                const isCorrect = selectedOption.value === questions[currentQuestionIndex].correctAnswer;
+                score += isCorrect ? 1 : 0;
+
+                // Hide the submit button, show the next button, and disable radio buttons
+                document.getElementById('submit-btn').style.display = 'none';
+                document.getElementById('next-btn').style.display = 'inline';
+                document.querySelectorAll('input[name="options"]').forEach(option => {
+                    option.disabled = true;
+                });
+            }
+        }
+
+        // Function to display the next question
+        function nextQuestion() {
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex <questions.length) {
+                // Display the next question
+                displayQuestion();
+
+                // Hide the next button, show the submit button, and enable radio buttons
+                document.getElementById('next-btn').style.display = 'none';
+                document.getElementById('submit-btn').style.display = 'inline';
+                document.querySelectorAll('input[name="options"]').forEach(option => {
+                    option.checked = false;
+                    option.disabled = false;
+                });
+                document.getElementById('score-container').style.display = 'block';
+                document.getElementById('score-container').innerText = `Your score: ${score}`;
+                
+            } else {
+               
+                document.getElementById('score-container').style.display = 'block';
+                document.getElementById('score-container').innerText = `Your score: ${score}`;
+                
+                // Submit the score and date to the server
+                submitScore(score);
+            }
+        }
+
+    async function submitScore(score) {
+    console.log(score);
+    const currentDate = new Date().toLocaleDateString();
+    const token = localStorage.getItem('token');
+    const userRollNumber = getUserId();  // Replace with your logic to get the user's roll number
+
+    try {
+        const response = await fetch('/submit-score', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ rollnumber: userRollNumber, score, date: currentDate }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to submit score');
+        }
+
+        // Assuming the server sends the updated score in the response
+        const { rollnumber, updatedScore } = await response.json();
+
+        // Display the updated score on the page
+        document.getElementById('score-container').innerText = `Your updated score: ${updatedScore}`;
+
+        console.log(`Score submitted successfully for rollnumber ${rollnumber}`);
+    } catch (error) {
+        console.error('Error submitting score:', error);
+    }
+}
+
+
+
+
+
+        // Initialize the quiz
+        async function initializeQuiz() {
+            // Fetch random questions from the server
+            await fetchRandomQuestions();
+
+            // Display the first question
+            displayQuestion();
+        }
+
+        // Call the initializeQuiz function when the page loads
+        window.onload = initializeQuiz;
+    </script>
+</body>
+</html>
